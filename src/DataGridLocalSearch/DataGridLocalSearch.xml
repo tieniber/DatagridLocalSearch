@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="DataGridLocalSearch.widget.DataGridLocalSearch" needsEntityContext="false" xmlns="http://www.mendix.com/widget/1.0/">
+    <name>Local Search</name>
+    <description>The description of this widget.</description>
+
+    <icon />
+
+    <properties>
+		<property key="targetGridName" type="string" required="true" defaultValue="">
+            <caption>Grid Name</caption>
+            <category>Behavior</category>
+            <description>The name of the grid on this page, as configured in the modeler.</description>
+        </property>
+		<property key="gridEntity" type="entity" required="true" allowNonPersistableEntities="true">
+            <caption>Grid Entity</caption>
+            <category>Behavior</category>
+            <description>The type of objects in the grid.</description>
+        </property>
+        <property key="attrsToSearch" type="object" isList="true" required="false">
+            <caption>Attributes to search</caption>            
+            <category>Behavior</category>
+            <description>Attributes on the object to search. Leave blank to search all local attributes.</description>
+            <properties>
+				<property key="attribute" type="attribute" required="false" entityProperty="../gridEntity" isPath="optional" pathType="reference">
+					<caption>Search Attribute</caption>
+					<category>Behavior</category>
+					<description>The attribute to search.</description>
+					<attributeTypes>
+						<attributeType name="Enum"/>
+						<attributeType name="String"/>
+						<attributeType name="Integer"/>
+						<attributeType name="Decimal"/>
+						<attributeType name="Long"/>
+						<attributeType name="AutoNumber"/>
+                        <attributeType name="DateTime"/>
+					</attributeTypes>
+				</property>
+            </properties>
+        </property>
+    </properties>
+</widget>

@@ -1,0 +1,20 @@
+
+.dataGridSearchContainer {
+    position: relative;
+    display: flex;
+}
+
+.dataGridSearchContainer i {
+    position: absolute;
+    top: 10px;
+    margin-left: 9px;
+    color: gray;
+}
+
+.dataGridSearchField {
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: normal;
+    text-align: inherit;
+    padding-left: 25px !important;
+}
