@@ -5,7 +5,7 @@
 
     <icon />
 
-    <properties>
+    <properties>  
 		<property key="targetGridName" type="string" required="true" defaultValue="">
             <caption>Grid Name</caption>
             <category>Behavior</category>

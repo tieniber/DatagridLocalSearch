@@ -72,11 +72,12 @@ define([
                 this._refreshing = true;
                 this._grid = this._findGrid();
 
-                if (this._grid.config.datasource.type !==  "entityPath" && this._grid.config.datasource.type !== "microflow" ) {
-                    console.error("Grid must be sourced via microflow or association to perform a local search.");
-                }            
+                const gridListType = this._grid.datasource ? this._grid.datasource.type : this._grid.config.datasource.type;
+                if (gridListType !==  "entityPath" && gridListType !== "microflow" ) {
+                    console.error("Grid or List must be sourced via microflow or association to perform a local search.");
+                }          
                 var grid = this._grid,
-                    datasource = grid._dataSource;
+                    datasource = grid._datasource || grid._dataSource;
 
                 if (!datasource._holdObjs) {
                     datasource._holdObjs = datasource._allObjects || datasource._allObjs;
@@ -89,12 +90,18 @@ define([
                 this._buildMicroflowFilter();
                 datasource._allObjects = datasource._holdObjs.filter(datasource._filter);
                 datasource._updateClientPaging(datasource._allObjects);
-                grid.fillGrid()
-                this._refreshing = false;
+                if (grid.refreshGrid) {
+                    grid.refreshGrid();
+                    this._refreshing = false;
+				} else if (grid._renderData) {
+                    grid._renderData(() => {
+                        this._refreshing = false
+                    });
+                }
             }.bind(this), 250);
         },
         _buildMicroflowFilter: function() {
-            var datasource = this._grid._dataSource;
+            var datasource = this._grid._dataSource || this._grid._datasource;
             var curVal = this.searchNode.value;
             if (!curVal) {
                 curVal = "";
@@ -132,7 +139,6 @@ define([
         },        
         _resetHandles: function(grid) {
             //if the grid refreshes (like in a tab set to reload), re-apply the search
-            //this._grid.registerToPluginEvent("triggerOnRefresh", this._doSearch.bind(this), true)
             if (this.applyHandle) {
                 this.applyHandle.remove();
             }
@@ -143,16 +149,31 @@ define([
             if (this.refreshHandle) {
                 this.refreshHandle.remove();
             }
-            this.refreshHandle = dojoAspect.around(grid, "refreshGrid", function(deferred, args) {
+
+            //also re-apply the search if it reloads due to a refresh
+            //refreshGrid for data grid, _renderData for list view
+            const targetFunction = grid.refreshGrid ? "refreshGrid" : "_renderData" 
+            this.refreshHandle = dojoAspect.around(grid, targetFunction, function(origFunction) {
                 var self = this;
-                return function() {
+                return function(callback) {
                     if (!self._refreshing) {
                         self._doSearch();
+                        if (typeof callback === "function") {
+                            callback();
+                        }
                     } else {
-                        deferred();
+                        var deferred = origFunction.bind(grid)(callback);
+                        return deferred;
                     }
                 }
             }.bind(this));
+
+            /*const datasource = grid._dataSource || grid._datasource;
+            this.refreshHandle = dojoAspect.after(datasource, "reload", function(deferred, args) {
+                this._doSearch();
+                return deferred;
+            }.bind(this));*/
+
         },
         _ignore: function(e) {
             e.stopPropagation();

@@ -6,6 +6,7 @@ test/theme/
 test/userlib/
 test/.classpath
 test/.project
+test/GPUCache/
 test6.10.3/javasource/
 test6.10.3/deployment/
 test6.10.3/.classpath
