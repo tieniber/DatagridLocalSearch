@@ -1,6 +1,6 @@
 {
   "name": "DatagridLocalSearch",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A Mendix widget that adds an input box under each column header to enable inline searching.",
   "license": "Apache 2",
   "author": "Eric Tieniber",
@@ -22,8 +22,8 @@
   },
   "generatorVersion": "2.0.1",
   "paths": {
-    "testProjectFolder": "./test/",
-    "testProjectFileName": "Test.mpr"
+    "testProjectFolder": "/Volumes/[C] Windows 10/Mendix/Equinix/",
+    "testProjectFileName": "DataGridLocalSearch.mpr"
   },
   "scripts": {
     "build": "node ./node_modules/gulp/bin/gulp build",
