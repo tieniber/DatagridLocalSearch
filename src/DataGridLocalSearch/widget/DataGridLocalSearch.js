@@ -79,12 +79,12 @@ define([
                 var grid = this._grid,
                     datasource = grid._datasource || grid._dataSource;
 
-                if (!datasource._holdObjs) {
-                    datasource._holdObjs = datasource._allObjects || datasource._allObjs;
-                }
-
                 if(grid) {
                     this._resetHandles(grid);
+                }
+                //if _holdObjs hasn't been created yet, initialize it
+                if (!datasource._holdObjs) {
+                    datasource._holdObjs = datasource._allObjects || datasource._allObjs;
                 }
 
                 this._buildMicroflowFilter();
@@ -112,30 +112,37 @@ define([
                 targetAttributes = this.attrsToSearch.map(item => item.attribute);
             }
 
-            datasource._filter = function(rowObj) {
-                //run a contains search against the entire object
-                var attrs = [];
-                if (targetAttributes.length > 0) {
-                    attrs = targetAttributes;
-                } else {
-                    attrs = rowObj.getPrimitives();
-
-                }
-
-                var vals = attrs.map(attr => {
-                    if (rowObj.metaData.isDate(attr)) {
-                        return mx.parser.formatAttribute(rowObj, attr, { datePattern: mx.session.sessionData.locale.patterns.datetime })
-                    /*} else if (rowObj.metaData.isEnum(attr)) {
-                        var enumMap = rowObj.metaData.getEnumMap(attr); //used in 6.10.3
-                        return*/ 
+            if (keyword.length === 0) {
+                datasource._filter = function() {
+                    console.debug("Passthrough search - no filter applied");
+                    return true;
+                };
+            } else {
+                datasource._filter = function(rowObj) {
+                    //run a contains search against the entire object
+                    var attrs = [];
+                    if (targetAttributes.length > 0) {
+                        attrs = targetAttributes;
                     } else {
-                        return mx.parser.formatAttribute(rowObj, attr);
-                    } 
-                });
-                var searchInString = vals.join("|").toLowerCase();
-                console.debug("Searching for: " + keyword + "\nin the string: " + searchInString);
-                return searchInString.includes(keyword);
-            };
+                        attrs = rowObj.getPrimitives();
+    
+                    }
+    
+                    var vals = attrs.map(attr => {
+                        if (rowObj.metaData.isDate(attr)) {
+                            return mx.parser.formatAttribute(rowObj, attr, { datePattern: mx.session.sessionData.locale.patterns.datetime })
+                        /*} else if (rowObj.metaData.isEnum(attr)) {
+                            var enumMap = rowObj.metaData.getEnumMap(attr); //used in 6.10.3
+                            return*/ 
+                        } else {
+                            return mx.parser.formatAttribute(rowObj, attr);
+                        } 
+                    });
+                    var searchInString = vals.join("|").toLowerCase();
+                    console.debug("Searching for: " + keyword + "\nin the string: " + searchInString);
+                    return searchInString.includes(keyword);
+                };
+            }
         },        
         _resetHandles: function(grid) {
             //if the grid refreshes (like in a tab set to reload), re-apply the search
@@ -157,6 +164,10 @@ define([
                 var self = this;
                 return function(callback) {
                     if (!self._refreshing) {
+                        //Fix ET 12/15/2020  - reset holdObjs when the grid refreshes
+                        var datasource = grid._datasource || grid._dataSource;
+                        datasource._holdObjs = datasource._allObjects || datasource._allObjs;
+                        //End fix
                         self._doSearch();
                         if (typeof callback === "function") {
                             callback();
@@ -167,12 +178,6 @@ define([
                     }
                 }
             }.bind(this));
-
-            /*const datasource = grid._dataSource || grid._datasource;
-            this.refreshHandle = dojoAspect.after(datasource, "reload", function(deferred, args) {
-                this._doSearch();
-                return deferred;
-            }.bind(this));*/
 
         },
         _ignore: function(e) {
