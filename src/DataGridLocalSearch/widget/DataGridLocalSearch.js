@@ -129,7 +129,7 @@ define([
                     }
     
                     var vals = attrs.map(attr => {
-                        if (rowObj.metaData.isDate(attr)) {
+                        if (rowObj.metaData.attributes[attr].type === "DateTime") {
                             return mx.parser.formatAttribute(rowObj, attr, { datePattern: mx.session.sessionData.locale.patterns.datetime })
                         /*} else if (rowObj.metaData.isEnum(attr)) {
                             var enumMap = rowObj.metaData.getEnumMap(attr); //used in 6.10.3
